@@ -1,0 +1,34 @@
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo-prod-data:/data/db
+    networks:
+      - osint-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - STORAGE=mongo
+      - MONGO_URL=mongodb://mongo:27017/osint
+      - JWT_SECRET=${JWT_SECRET:-supersecret-osint-jwt-production-token-key-32chars}
+      - JWT_TTL_HOURS=8
+      - ADMIN_EMAILS=admin@example.com
+      - COLLECTOR_MODE=live
+    depends_on:
+      - mongo
+    networks:
+      - osint-network
+
+volumes:
+  mongo-prod-data:
+
+networks:
+  osint-network:

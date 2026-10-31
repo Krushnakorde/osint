@@ -1,0 +1,581 @@
+[
+ {
+  "name": "paypal",
+  "domains": [
+   "paypal.com"
+  ]
+ },
+ {
+  "name": "microsoft",
+  "domains": [
+   "microsoft.com",
+   "live.com",
+   "outlook.com",
+   "office.com",
+   "office365.com"
+  ]
+ },
+ {
+  "name": "google",
+  "domains": [
+   "google.com",
+   "google.co.in"
+  ]
+ },
+ {
+  "name": "apple",
+  "domains": [
+   "apple.com",
+   "icloud.com"
+  ]
+ },
+ {
+  "name": "amazon",
+  "domains": [
+   "amazon.com",
+   "amazon.in"
+  ]
+ },
+ {
+  "name": "netflix",
+  "domains": [
+   "netflix.com"
+  ]
+ },
+ {
+  "name": "facebook",
+  "domains": [
+   "facebook.com"
+  ]
+ },
+ {
+  "name": "instagram",
+  "domains": [
+   "instagram.com"
+  ]
+ },
+ {
+  "name": "whatsapp",
+  "domains": [
+   "whatsapp.com"
+  ]
+ },
+ {
+  "name": "telegram",
+  "domains": [
+   "telegram.org"
+  ]
+ },
+ {
+  "name": "linkedin",
+  "domains": [
+   "linkedin.com"
+  ]
+ },
+ {
+  "name": "dropbox",
+  "domains": [
+   "dropbox.com"
+  ]
+ },
+ {
+  "name": "adobe",
+  "domains": [
+   "adobe.com"
+  ]
+ },
+ {
+  "name": "spotify",
+  "domains": [
+   "spotify.com"
+  ]
+ },
+ {
+  "name": "ebay",
+  "domains": [
+   "ebay.com"
+  ]
+ },
+ {
+  "name": "alibaba",
+  "domains": [
+   "alibaba.com"
+  ]
+ },
+ {
+  "name": "aliexpress",
+  "domains": [
+   "aliexpress.com"
+  ]
+ },
+ {
+  "name": "walmart",
+  "domains": [
+   "walmart.com"
+  ]
+ },
+ {
+  "name": "dhl",
+  "domains": [
+   "dhl.com"
+  ]
+ },
+ {
+  "name": "fedex",
+  "domains": [
+   "fedex.com"
+  ]
+ },
+ {
+  "name": "royalmail",
+  "domains": [
+   "royalmail.com"
+  ]
+ },
+ {
+  "name": "docusign",
+  "domains": [
+   "docusign.com"
+  ]
+ },
+ {
+  "name": "zoom",
+  "domains": [
+   "zoom.us"
+  ]
+ },
+ {
+  "name": "steam",
+  "domains": [
+   "steampowered.com"
+  ]
+ },
+ {
+  "name": "roblox",
+  "domains": [
+   "roblox.com"
+  ]
+ },
+ {
+  "name": "binance",
+  "domains": [
+   "binance.com"
+  ]
+ },
+ {
+  "name": "coinbase",
+  "domains": [
+   "coinbase.com"
+  ]
+ },
+ {
+  "name": "kraken",
+  "domains": [
+   "kraken.com"
+  ]
+ },
+ {
+  "name": "bitfinex",
+  "domains": [
+   "bitfinex.com"
+  ]
+ },
+ {
+  "name": "kucoin",
+  "domains": [
+   "kucoin.com"
+  ]
+ },
+ {
+  "name": "okx",
+  "domains": [
+   "okx.com"
+  ]
+ },
+ {
+  "name": "bybit",
+  "domains": [
+   "bybit.com"
+  ]
+ },
+ {
+  "name": "gemini",
+  "domains": [
+   "gemini.com"
+  ]
+ },
+ {
+  "name": "blockchain",
+  "domains": [
+   "blockchain.com"
+  ]
+ },
+ {
+  "name": "metamask",
+  "domains": [
+   "metamask.io"
+  ]
+ },
+ {
+  "name": "trustwallet",
+  "domains": [
+   "trustwallet.com"
+  ]
+ },
+ {
+  "name": "ledger",
+  "domains": [
+   "ledger.com"
+  ]
+ },
+ {
+  "name": "trezor",
+  "domains": [
+   "trezor.io"
+  ]
+ },
+ {
+  "name": "exodus",
+  "domains": [
+   "exodus.com"
+  ]
+ },
+ {
+  "name": "phantom",
+  "domains": [
+   "phantom.app"
+  ]
+ },
+ {
+  "name": "uniswap",
+  "domains": [
+   "uniswap.org"
+  ]
+ },
+ {
+  "name": "opensea",
+  "domains": [
+   "opensea.io"
+  ]
+ },
+ {
+  "name": "pancakeswap",
+  "domains": [
+   "pancakeswap.finance"
+  ]
+ },
+ {
+  "name": "tether",
+  "domains": [
+   "tether.to"
+  ]
+ },
+ {
+  "name": "wazirx",
+  "domains": [
+   "wazirx.com"
+  ]
+ },
+ {
+  "name": "coindcx",
+  "domains": [
+   "coindcx.com"
+  ]
+ },
+ {
+  "name": "zebpay",
+  "domains": [
+   "zebpay.com"
+  ]
+ },
+ {
+  "name": "mudrex",
+  "domains": [
+   "mudrex.com"
+  ]
+ },
+ {
+  "name": "bitbns",
+  "domains": [
+   "bitbns.com"
+  ]
+ },
+ {
+  "name": "giottus",
+  "domains": [
+   "giottus.com"
+  ]
+ },
+ {
+  "name": "cryptocom",
+  "domains": [
+   "crypto.com"
+  ]
+ },
+ {
+  "name": "bitget",
+  "domains": [
+   "bitget.com"
+  ]
+ },
+ {
+  "name": "sbi",
+  "domains": [
+   "sbi.co.in",
+   "onlinesbi.sbi",
+   "sbicard.com"
+  ]
+ },
+ {
+  "name": "hdfcbank",
+  "domains": [
+   "hdfcbank.com"
+  ]
+ },
+ {
+  "name": "icicibank",
+  "domains": [
+   "icicibank.com"
+  ]
+ },
+ {
+  "name": "axisbank",
+  "domains": [
+   "axisbank.com"
+  ]
+ },
+ {
+  "name": "kotak",
+  "domains": [
+   "kotak.com"
+  ]
+ },
+ {
+  "name": "pnb",
+  "domains": [
+   "pnbindia.in"
+  ]
+ },
+ {
+  "name": "yesbank",
+  "domains": [
+   "yesbank.in"
+  ]
+ },
+ {
+  "name": "indusind",
+  "domains": [
+   "indusind.com"
+  ]
+ },
+ {
+  "name": "bankofbaroda",
+  "domains": [
+   "bankofbaroda.in"
+  ]
+ },
+ {
+  "name": "canarabank",
+  "domains": [
+   "canarabank.com"
+  ]
+ },
+ {
+  "name": "idfcfirstbank",
+  "domains": [
+   "idfcfirstbank.com"
+  ]
+ },
+ {
+  "name": "paytm",
+  "domains": [
+   "paytm.com"
+  ]
+ },
+ {
+  "name": "phonepe",
+  "domains": [
+   "phonepe.com"
+  ]
+ },
+ {
+  "name": "bhimupi",
+  "domains": [
+   "bhimupi.org.in"
+  ]
+ },
+ {
+  "name": "npci",
+  "domains": [
+   "npci.org.in"
+  ]
+ },
+ {
+  "name": "razorpay",
+  "domains": [
+   "razorpay.com"
+  ]
+ },
+ {
+  "name": "flipkart",
+  "domains": [
+   "flipkart.com"
+  ]
+ },
+ {
+  "name": "myntra",
+  "domains": [
+   "myntra.com"
+  ]
+ },
+ {
+  "name": "meesho",
+  "domains": [
+   "meesho.com"
+  ]
+ },
+ {
+  "name": "snapdeal",
+  "domains": [
+   "snapdeal.com"
+  ]
+ },
+ {
+  "name": "nykaa",
+  "domains": [
+   "nykaa.com"
+  ]
+ },
+ {
+  "name": "swiggy",
+  "domains": [
+   "swiggy.com"
+  ]
+ },
+ {
+  "name": "zomato",
+  "domains": [
+   "zomato.com"
+  ]
+ },
+ {
+  "name": "bigbasket",
+  "domains": [
+   "bigbasket.com"
+  ]
+ },
+ {
+  "name": "jio",
+  "domains": [
+   "jio.com"
+  ]
+ },
+ {
+  "name": "airtel",
+  "domains": [
+   "airtel.in"
+  ]
+ },
+ {
+  "name": "vodafone",
+  "domains": [
+   "vodafone.in"
+  ]
+ },
+ {
+  "name": "bsnl",
+  "domains": [
+   "bsnl.co.in"
+  ]
+ },
+ {
+  "name": "irctc",
+  "domains": [
+   "irctc.co.in"
+  ]
+ },
+ {
+  "name": "uidai",
+  "domains": [
+   "uidai.gov.in"
+  ]
+ },
+ {
+  "name": "incometax",
+  "domains": [
+   "incometax.gov.in"
+  ]
+ },
+ {
+  "name": "epfindia",
+  "domains": [
+   "epfindia.gov.in"
+  ]
+ },
+ {
+  "name": "indiapost",
+  "domains": [
+   "indiapost.gov.in"
+  ]
+ },
+ {
+  "name": "olx",
+  "domains": [
+   "olx.in"
+  ]
+ },
+ {
+  "name": "makemytrip",
+  "domains": [
+   "makemytrip.com"
+  ]
+ },
+ {
+  "name": "bookmyshow",
+  "domains": [
+   "bookmyshow.com"
+  ]
+ },
+ {
+  "name": "zerodha",
+  "domains": [
+   "zerodha.com"
+  ]
+ },
+ {
+  "name": "upstox",
+  "domains": [
+   "upstox.com"
+  ]
+ },
+ {
+  "name": "groww",
+  "domains": [
+   "groww.in"
+  ]
+ },
+ {
+  "name": "angelone",
+  "domains": [
+   "angelone.in"
+  ]
+ },
+ {
+  "name": "bajajfinserv",
+  "domains": [
+   "bajajfinserv.in"
+  ]
+ },
+ {
+  "name": "paisabazaar",
+  "domains": [
+   "paisabazaar.com"
+  ]
+ },
+ {
+  "name": "cred",
+  "domains": [
+   "cred.club"
+  ]
+ }
+]

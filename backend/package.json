@@ -1,0 +1,34 @@
+{
+  "name": "osint-fraud-backend",
+  "version": "1.0.0",
+  "description": "Passive OSINT fraud-infrastructure platform: MongoDB (Mongoose), JWT auth, BI analytics, ML classifier (TypeScript)",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "init-db": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/init-db.ts",
+    "seed": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/seed.ts",
+    "import": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/import-observations.ts",
+    "lookup": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/lookup.ts",
+    "feeds": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/refresh-feeds.ts",
+    "train": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/train.ts",
+    "create-admin": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/create-admin.ts",
+    "reset-password": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/reset-password.ts",
+    "extract-apk": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/extract-apk-meta.ts",
+    "start": "node --experimental-strip-types --disable-warning=ExperimentalWarning src/server.ts",
+    "dev": "node --watch --experimental-strip-types --disable-warning=ExperimentalWarning src/server.ts",
+    "evaluate": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/evaluate.ts",
+    "test": "node --experimental-strip-types --disable-warning=ExperimentalWarning --test test/*.test.ts",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit",
+    "build:all": "tsc --noEmit && npm --prefix ../frontend run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "mongoose": "^8.8.0"
+  }
+}

@@ -1,0 +1,399 @@
+{
+  "generatedAt": "2026-10-27T06:23:32.410Z",
+  "synthetic": true,
+  "observations": 521,
+  "base": {
+    "threshold": 0.6,
+    "metrics": {
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    "latency": {
+      "ingestPerObservationMs": {
+        "mean": 0.247,
+        "p50": 0.224,
+        "p95": 0.648
+      },
+      "correlateAllMs": 32.3,
+      "queryMs": {
+        "mean": 0.289,
+        "p50": 0.197,
+        "p95": 0.79,
+        "samples": 100
+      }
+    }
+  },
+  "sweep": [
+    {
+      "threshold": 0.3,
+      "correlationAccuracyPct": 85.16,
+      "crossVectorAccuracyPct": 81.22,
+      "falsePositiveRatePct": 9.886,
+      "precisionPct": 7.59,
+      "f1": 0.1394,
+      "counts": {
+        "tp": 1090,
+        "fp": 13265,
+        "fn": 190,
+        "tn": 120915,
+        "xtp": 601,
+        "xfn": 139
+      },
+      "assets": 521
+    },
+    {
+      "threshold": 0.4,
+      "correlationAccuracyPct": 81.8,
+      "crossVectorAccuracyPct": 78.38,
+      "falsePositiveRatePct": 0.5239,
+      "precisionPct": 59.83,
+      "f1": 0.6911,
+      "counts": {
+        "tp": 1047,
+        "fp": 703,
+        "fn": 233,
+        "tn": 133477,
+        "xtp": 580,
+        "xfn": 160
+      },
+      "assets": 521
+    },
+    {
+      "threshold": 0.5,
+      "correlationAccuracyPct": 73.75,
+      "crossVectorAccuracyPct": 72.3,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8489,
+      "counts": {
+        "tp": 944,
+        "fp": 0,
+        "fn": 336,
+        "tn": 134180,
+        "xtp": 535,
+        "xfn": 205
+      },
+      "assets": 521
+    },
+    {
+      "threshold": 0.6,
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "threshold": 0.7,
+      "correlationAccuracyPct": 61.95,
+      "crossVectorAccuracyPct": 63.78,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.7651,
+      "counts": {
+        "tp": 793,
+        "fp": 0,
+        "fn": 487,
+        "tn": 134180,
+        "xtp": 472,
+        "xfn": 268
+      },
+      "assets": 521
+    },
+    {
+      "threshold": 0.8,
+      "correlationAccuracyPct": 44.77,
+      "crossVectorAccuracyPct": 48.92,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.6185,
+      "counts": {
+        "tp": 573,
+        "fp": 0,
+        "fn": 707,
+        "tn": 134180,
+        "xtp": 362,
+        "xfn": 378
+      },
+      "assets": 521
+    },
+    {
+      "threshold": 0.9,
+      "correlationAccuracyPct": 2.97,
+      "crossVectorAccuracyPct": 1.76,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.0577,
+      "counts": {
+        "tp": 38,
+        "fp": 0,
+        "fn": 1242,
+        "tn": 134180,
+        "xtp": 13,
+        "xfn": 727
+      },
+      "assets": 521
+    }
+  ],
+  "ablation": [
+    {
+      "removed": "wallet",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "apk",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "signer",
+      "correlationAccuracyPct": 66.88,
+      "crossVectorAccuracyPct": 66.49,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8015,
+      "counts": {
+        "tp": 856,
+        "fp": 0,
+        "fn": 424,
+        "tn": 134180,
+        "xtp": 492,
+        "xfn": 248
+      },
+      "assets": 521
+    },
+    {
+      "removed": "tracker",
+      "correlationAccuracyPct": 55.55,
+      "crossVectorAccuracyPct": 57.84,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.7142,
+      "counts": {
+        "tp": 711,
+        "fp": 0,
+        "fn": 569,
+        "tn": 134180,
+        "xtp": 428,
+        "xfn": 312
+      },
+      "assets": 521
+    },
+    {
+      "removed": "cert",
+      "correlationAccuracyPct": 60.62,
+      "crossVectorAccuracyPct": 62.3,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.7549,
+      "counts": {
+        "tp": 776,
+        "fp": 0,
+        "fn": 504,
+        "tn": 134180,
+        "xtp": 461,
+        "xfn": 279
+      },
+      "assets": 521
+    },
+    {
+      "removed": "package",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "ip",
+      "correlationAccuracyPct": 54.69,
+      "crossVectorAccuracyPct": 57.3,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.7071,
+      "counts": {
+        "tp": 700,
+        "fp": 0,
+        "fn": 580,
+        "tn": 134180,
+        "xtp": 424,
+        "xfn": 316
+      },
+      "assets": 521
+    },
+    {
+      "removed": "nameserver",
+      "correlationAccuracyPct": 66.88,
+      "crossVectorAccuracyPct": 67.7,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8015,
+      "counts": {
+        "tp": 856,
+        "fp": 0,
+        "fn": 424,
+        "tn": 134180,
+        "xtp": 501,
+        "xfn": 239
+      },
+      "assets": 521
+    },
+    {
+      "removed": "brand",
+      "correlationAccuracyPct": 66.64,
+      "crossVectorAccuracyPct": 67.43,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.7998,
+      "counts": {
+        "tp": 853,
+        "fp": 0,
+        "fn": 427,
+        "tn": 134180,
+        "xtp": 499,
+        "xfn": 241
+      },
+      "assets": 521
+    },
+    {
+      "removed": "report",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "registrar",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "asn",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "domain",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "blocklist",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    }
+  ]
+}

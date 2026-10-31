@@ -5,13 +5,16 @@
 
 # Stage 1: Build the Vite React Frontend
 FROM node:22-alpine AS frontend-builder
-WORKDIR /app/frontend
+WORKDIR /app
 
-COPY frontend/package*.json ./
-RUN npm ci
+# Cache and install frontend dependencies
+COPY frontend/package*.json ./frontend/
+RUN cd frontend && npm ci
 
-COPY frontend/ ./
-RUN npm run build
+# Copy backend (required for TypeScript type imports) and frontend source
+COPY backend/ ./backend/
+COPY frontend/ ./frontend/
+RUN cd frontend && npm run build
 
 # Stage 2: Runtime Backend & Static Serving
 FROM node:22-alpine

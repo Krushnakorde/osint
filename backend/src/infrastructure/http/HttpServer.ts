@@ -5,7 +5,42 @@ import { AppError } from '../../domain/errors.ts';
 import type { Router } from './Router.ts';
 
 export interface HttpOptions { corsOrigin: string; staticDir?: string }
-const MIME: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.json': 'application/json', '.png': 'image/png' };
+const MIME: Record<string, string> = {
+  '.html': 'text/html',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.svg': 'image/svg+xml',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.txt': 'text/plain',
+  '.ico': 'image/x-icon',
+};
+
+const ROBOTS_TXT = `# OSINT Fraud Framework Security Policy
+User-agent: *
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+`;
 
 function readBody(req: http.IncomingMessage): Promise<unknown> {
   return new Promise((resolve, reject) => {
@@ -19,9 +54,15 @@ function readBody(req: http.IncomingMessage): Promise<unknown> {
 export function createHttpServer(router: Router, opts: HttpOptions): http.Server {
   const send = (res: http.ServerResponse, status: number, body?: unknown): void => {
     res.writeHead(status, {
-      'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
-      'Access-Control-Allow-Origin': opts.corsOrigin, 'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS', Vary: 'Origin',
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Access-Control-Allow-Origin': opts.corsOrigin,
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      Vary: 'Origin',
     });
     res.end(status === 204 || body === undefined ? undefined : JSON.stringify(body));
   };
@@ -29,6 +70,16 @@ export function createHttpServer(router: Router, opts: HttpOptions): http.Server
     const url = new URL(req.url ?? '/', 'http://localhost');
     try {
       if (req.method === 'OPTIONS') return send(res, 204);
+      if (url.pathname === '/robots.txt') {
+        res.writeHead(200, {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'Cache-Control': 'public, max-age=86400',
+        });
+        res.end(ROBOTS_TXT);
+        return;
+      }
       if (url.pathname.startsWith('/api/')) {
         const m = router.match(req.method ?? 'GET', url.pathname);
         if (m === null) return send(res, 404, { error: 'not_found', message: 'Unknown endpoint.' });
@@ -41,7 +92,12 @@ export function createHttpServer(router: Router, opts: HttpOptions): http.Server
       if (dir && fs.existsSync(dir)) {
         let file = path.join(dir, path.normalize(url.pathname).replace(/^(\.\.[/\\])+/, ''));
         if (!file.startsWith(dir) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) file = path.join(dir, 'index.html');
-        res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] ?? 'application/octet-stream', 'X-Content-Type-Options': 'nosniff' });
+        res.writeHead(200, {
+          'Content-Type': MIME[path.extname(file)] ?? 'application/octet-stream',
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+        });
         fs.createReadStream(file).pipe(res);
         return;
       }

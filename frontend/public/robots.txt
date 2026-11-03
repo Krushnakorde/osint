@@ -1,0 +1,52 @@
+# ==============================================================================
+# ROBOTS.TXT - OSINT FRAUD INVESTIGATION PLATFORM
+# ==============================================================================
+# Security Policy: Disallow all search engines, automated scrapers, and AI bots
+# from indexing, crawling, or extracting data from this private forensic tool.
+# ==============================================================================
+
+User-agent: *
+Disallow: /
+
+# Explicitly Disallow Known AI Bots, LLM Crawlers, and Scrapers
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Claude-Web
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: Diffbot
+Disallow: /
+
+User-agent: FacebookBot
+Disallow: /
+
+User-agent: PerplexityBot
+Disallow: /
+
+User-agent: Cohere-ai
+Disallow: /
+
+User-agent: Omegabot
+Disallow: /
+
+User-agent: Applebot-Extended
+Disallow: /

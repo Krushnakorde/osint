@@ -1,0 +1,6 @@
+# RFC 9116 Security Contact Information
+Contact: mailto:krushnakorde0310@gmail.com
+Preferred-Languages: en, mr
+Policy: https://github.com/Krushnakorde/osint
+Acknowledgments: https://github.com/Krushnakorde/osint
+Canonical: /.well-known/security.txt

@@ -28,6 +28,8 @@ export class AuthController {
     router.add('POST', '/api/auth/login', async (c): Promise<HttpResult> => ({ status: 200, body: await this.auth.login(asObject(c.body), c.ip) }));
     router.add('POST', '/api/auth/logout', async (c): Promise<HttpResult> => { await this.auth.logout(user(c).claims); return { status: 204 }; }, requireAuth(this.auth));
     router.add('GET', '/api/auth/me', async (c): Promise<HttpResult> => ({ status: 200, body: { user: user(c).user } }), requireAuth(this.auth));
+    router.add('POST', '/api/auth/forgot-password', async (c): Promise<HttpResult> => ({ status: 200, body: await this.auth.requestPasswordReset(asObject(c.body)) }));
+    router.add('POST', '/api/auth/reset-password', async (c): Promise<HttpResult> => ({ status: 200, body: await this.auth.resetPassword(asObject(c.body)) }));
   }
 }
 

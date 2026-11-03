@@ -140,6 +140,22 @@ export const register = (email: string, password: string, name: string) =>
 /** Retrieves the current authenticated user's profile using the stored Bearer token */
 export const getMe = () => requestJson<{ user: User }>('/api/auth/me');
 
+/** Requests a 6-digit password reset verification code */
+export const requestPasswordReset = (email: string) =>
+  requestJson<{ success: boolean; message: string; resetCode?: string }>('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+/** Submits verification code and sets a new password */
+export const resetPassword = (email: string, code: string, newPassword: string) =>
+  requestJson<{ success: boolean; message: string }>('/api/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code, newPassword }),
+  });
+
 /**
  * Terminates user session: notifies backend to add token JTI to revocation list,
  * and clears the token from browser LocalStorage.

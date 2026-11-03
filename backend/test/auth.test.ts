@@ -72,3 +72,44 @@ test('admin emails from configuration become admins', async () => {
   assert.equal((await s.auth.register({ ...creds(2), email: 'boss@example.com' })).user.role, 'admin');
   assert.equal(crypto.randomUUID().length, 36);
 });
+
+test('forgot password & reset password flow works securely', async () => {
+  const { s } = await world();
+  await s.auth.register(creds(1));
+
+  // Request reset for registered email
+  const req = await s.auth.requestPasswordReset({ email: 'user1@example.com' });
+  assert.ok(req.success);
+  assert.ok(req.resetCode && /^\d{6}$/.test(req.resetCode));
+
+  // Request reset for unregistered email does not reveal account absence
+  const reqUnknown = await s.auth.requestPasswordReset({ email: 'ghost@example.com' });
+  assert.ok(reqUnknown.success);
+  assert.equal(reqUnknown.resetCode, undefined);
+
+  // Invalid code rejected
+  await assert.rejects(
+    () => s.auth.resetPassword({ email: 'user1@example.com', code: '000000', newPassword: 'new-valid-password' }),
+    (e: unknown) => e instanceof AppError && e.code === 'invalid_code'
+  );
+
+  // Short password rejected
+  await assert.rejects(
+    () => s.auth.resetPassword({ email: 'user1@example.com', code: req.resetCode, newPassword: 'short' }),
+    (e: unknown) => e instanceof AppError && e.code === 'weak_password'
+  );
+
+  // Correct code updates password
+  const resetRes = await s.auth.resetPassword({ email: 'user1@example.com', code: req.resetCode, newPassword: 'new-valid-password-123' });
+  assert.ok(resetRes.success);
+
+  // Old password fails
+  await assert.rejects(
+    () => s.auth.login({ email: 'user1@example.com', password: 'correct horse battery' }, 'ip'),
+    (e: unknown) => e instanceof AppError && e.code === 'bad_credentials'
+  );
+
+  // New password succeeds
+  const loginNew = await s.auth.login({ email: 'user1@example.com', password: 'new-valid-password-123' }, 'ip');
+  assert.ok(loginNew.token);
+});

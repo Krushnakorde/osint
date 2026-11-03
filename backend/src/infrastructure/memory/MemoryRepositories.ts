@@ -17,6 +17,10 @@ export class MemoryUserRepository implements UserRepository {
   async findByIds(ids: string[]): Promise<UserRecord[]> { return ids.flatMap((id) => { const u = this.users.get(id); return u ? [{ ...u }] : []; }); }
   async count(): Promise<number> { return this.users.size; }
   async touchLogin(id: string): Promise<void> { const u = this.users.get(id); if (u) u.lastLoginAt = new Date().toISOString(); }
+  async updatePassword(id: string, newPasswordHash: string): Promise<void> {
+    const u = this.users.get(id);
+    if (u) u.passwordHash = newPasswordHash;
+  }
 }
 
 export class MemoryRevokedTokenRepository implements RevokedTokenRepository {

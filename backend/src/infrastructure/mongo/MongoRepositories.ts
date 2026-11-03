@@ -22,6 +22,9 @@ export class MongoUserRepository implements UserRepository {
   }
   async count(): Promise<number> { return UserModel.estimatedDocumentCount(); }
   async touchLogin(id: string): Promise<void> { await UserModel.updateOne({ _id: id }, { $set: { lastLoginAt: new Date() } }); }
+  async updatePassword(id: string, newPasswordHash: string): Promise<void> {
+    await UserModel.updateOne({ _id: id }, { $set: { passwordHash: newPasswordHash } });
+  }
 }
 
 export class MongoRevokedTokenRepository implements RevokedTokenRepository {

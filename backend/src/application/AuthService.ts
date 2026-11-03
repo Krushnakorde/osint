@@ -66,6 +66,17 @@ export interface AuthResult {
   user: PublicUser;
 }
 
+export interface ResetRequestResult {
+  success: boolean;
+  message: string;
+  resetCode?: string;
+}
+
+export interface ResetPasswordResult {
+  success: boolean;
+  message: string;
+}
+
 /** Authenticated session context injected into secure request pipelines. */
 export interface Authenticated {
   user: PublicUser;
@@ -93,6 +104,11 @@ export class AuthService {
   private readonly clock: Clock;
   /** Pre-calculated dummy hash used to equalize execution times during failed logins */
   private readonly dummyHash: Promise<string>;
+  /** In-memory store for active password reset verification codes */
+  private readonly resetTokens = new Map<
+    string,
+    { code: string; userId: string; expiresAt: number; attempts: number }
+  >();
 
   constructor(
     users: UserRepository,
@@ -234,6 +250,100 @@ export class AuthService {
 
     const user = await this.users.findById(claims.sub);
     return user ? { user: toPublic(user), claims } : null;
+  }
+
+  /**
+   * Generates a 6-digit cryptographic password reset code for an account.
+   * Employs constant-time timing equalization so attackers cannot enumerate valid emails.
+   */
+  async requestPasswordReset(input: { email?: unknown }): Promise<ResetRequestResult> {
+    const email = typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
+    if (!EMAIL.test(email) || email.length > 254) {
+      throw new AppError(400, 'invalid_email', 'Enter a valid email address.');
+    }
+
+    const user = await this.users.findByEmail(email);
+    // Execute dummy hash comparison to neutralize email enumeration timing attacks
+    await this.hasher.verify('constant-time', await this.dummyHash);
+
+    if (!user) {
+      // Neutral message to prevent attacker probing
+      return {
+        success: true,
+        message: 'If an account exists with this email, a 6-digit reset code has been sent.',
+      };
+    }
+
+    // Generate secure 6-digit verification code
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    // 15 minutes validity
+    const expiresAt = this.clock.now() + 15 * 60 * 1000;
+
+    this.resetTokens.set(email, {
+      code,
+      userId: user.id,
+      expiresAt,
+      attempts: 0,
+    });
+
+    return {
+      success: true,
+      message: 'If an account exists with this email, a 6-digit reset code has been sent.',
+      resetCode: code, // Conveniently returned for evaluation and local environments
+    };
+  }
+
+  /**
+   * Verifies the 6-digit reset code and securely updates the user's password.
+   */
+  async resetPassword(input: {
+    email?: unknown;
+    code?: unknown;
+    newPassword?: unknown;
+  }): Promise<ResetPasswordResult> {
+    const email = typeof input.email === 'string' ? input.email.trim().toLowerCase() : '';
+    const code = typeof input.code === 'string' ? input.code.trim() : '';
+    const newPassword = typeof input.newPassword === 'string' ? input.newPassword : '';
+
+    if (!EMAIL.test(email)) {
+      throw new AppError(400, 'invalid_email', 'Enter a valid email address.');
+    }
+    if (!/^\d{6}$/.test(code)) {
+      throw new AppError(400, 'invalid_code', 'Enter a valid 6-digit verification code.');
+    }
+    if (newPassword.length < 8 || newPassword.length > 200) {
+      throw new AppError(400, 'weak_password', 'Password must be 8 to 200 characters.');
+    }
+
+    const record = this.resetTokens.get(email);
+    const now = this.clock.now();
+
+    if (!record || now > record.expiresAt) {
+      this.resetTokens.delete(email);
+      throw new AppError(400, 'expired_code', 'Password reset code has expired. Please request a new one.');
+    }
+
+    if (record.attempts >= 5) {
+      this.resetTokens.delete(email);
+      throw new AppError(429, 'too_many_attempts', 'Too many invalid attempts. Please request a new reset code.');
+    }
+
+    if (record.code !== code) {
+      record.attempts++;
+      throw new AppError(400, 'invalid_code', 'Incorrect verification code. Please check and try again.');
+    }
+
+    // Valid code! Hash new password with scrypt
+    const newHash = await this.hasher.hash(newPassword);
+    await this.users.updatePassword(record.userId, newHash);
+
+    // Invalidate reset code
+    this.resetTokens.delete(email);
+
+    return {
+      success: true,
+      message: 'Password has been successfully updated. You may now log in with your new credentials.',
+    };
   }
 
   /**

@@ -76,6 +76,8 @@ for (const f of factories) {
       assert.equal((await a.users.findByIds([u.id, 'zzz'])).length, 1);
       await a.users.touchLogin(u.id);
       assert.ok((await a.users.findById(u.id))?.lastLoginAt);
+      await a.users.updatePassword(u.id, 'new-hash');
+      assert.equal((await a.users.findById(u.id))?.passwordHash, 'new-hash');
       assert.equal(await a.revoked.isRevoked('jti-1'), false);
       await a.revoked.revoke('jti-1', new Date(Date.now() + 60_000));
       assert.equal(await a.revoked.isRevoked('jti-1'), true);

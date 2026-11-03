@@ -52,6 +52,7 @@ export interface UserRepository {
   findByIds(ids: string[]): Promise<UserRecord[]>;
   count(): Promise<number>;
   touchLogin(id: string): Promise<void>;
+  updatePassword(id: string, newPasswordHash: string): Promise<void>;
 }
 export interface RevokedTokenRepository {
   revoke(jti: string, expiresAt: Date): Promise<void>;

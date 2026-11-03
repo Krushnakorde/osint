@@ -2,6 +2,7 @@
   "name": "osint-fraud-framework",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "scripts": {
     "setup": "npm --prefix backend run init-db && npm --prefix backend run seed && npm --prefix frontend install",
     "backend": "npm --prefix backend start",

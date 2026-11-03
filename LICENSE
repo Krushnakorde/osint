@@ -1,21 +1,27 @@
-MIT License
+Copyright (c) 2026 Krushna Korde. All Rights Reserved.
 
-Copyright (c) 2026 Krushna Korde
+CONFIDENTIAL & PROPRIETARY SOURCE CODE
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This software, its domain algorithms, machine learning models, forensic scoring pipelines,
+architectural designs, and all accompanying research documentation are the sole intellectual
+property of Krushna Korde.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+TERMS AND CONDITIONS OF RESTRICTION:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+1. NO PERMISSION GRANTED:
+No person, organization, institution, automated system, or crawler is granted permission to
+copy, clone, run, modify, redistribute, sublicense, mirror, publish, or create derivative
+works of this codebase or any part thereof, without prior express written consent from Krushna Korde.
+
+2. STRICT ACADEMIC EVALUATION ONLY:
+Viewing access to this repository is provided strictly and solely for academic review and
+evaluation by authorized examiners and university faculty members.
+
+3. UNAUTHORIZED USE PROHIBITED:
+Any unauthorized reproduction, modification, decompilation, public display, or commercial
+exploitation of this codebase constitutes a direct violation of intellectual property laws,
+including the Indian Copyright Act, 1957 and international copyright conventions.
+
+Author & Copyright Holder:
+Krushna Korde
+Contact: krushnakorde0310@gmail.com

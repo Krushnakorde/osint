@@ -1,7 +1,7 @@
 {
   "name": "osint-fraud-backend",
   "version": "1.0.0",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "description": "Passive OSINT fraud-infrastructure platform: MongoDB (Mongoose), JWT auth, BI analytics, ML classifier (TypeScript)",
   "type": "module",
   "engines": {

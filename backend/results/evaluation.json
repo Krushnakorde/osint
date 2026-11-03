@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-27T06:23:32.410Z",
+  "generatedAt": "2026-11-03T12:44:08.356Z",
   "synthetic": true,
   "observations": 521,
   "base": {
@@ -22,15 +22,15 @@
     },
     "latency": {
       "ingestPerObservationMs": {
-        "mean": 0.247,
-        "p50": 0.224,
-        "p95": 0.648
+        "mean": 0.449,
+        "p50": 0.376,
+        "p95": 1.104
       },
-      "correlateAllMs": 32.3,
+      "correlateAllMs": 51.2,
       "queryMs": {
-        "mean": 0.289,
-        "p50": 0.197,
-        "p95": 0.79,
+        "mean": 0.437,
+        "p50": 0.324,
+        "p95": 1.036,
         "samples": 100
       }
     }
@@ -380,6 +380,40 @@
     },
     {
       "removed": "blocklist",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "email",
+      "correlationAccuracyPct": 69.3,
+      "crossVectorAccuracyPct": 69.46,
+      "falsePositiveRatePct": 0,
+      "precisionPct": 100,
+      "f1": 0.8186,
+      "counts": {
+        "tp": 887,
+        "fp": 0,
+        "fn": 393,
+        "tn": 134180,
+        "xtp": 514,
+        "xfn": 226
+      },
+      "assets": 521
+    },
+    {
+      "removed": "phone",
       "correlationAccuracyPct": 69.3,
       "crossVectorAccuracyPct": 69.46,
       "falsePositiveRatePct": 0,

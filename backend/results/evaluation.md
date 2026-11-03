@@ -9,9 +9,9 @@ Observations: 521, assets scored: 521, threshold: 0.6
 | False positive rate | 0% |
 | Precision | 100% |
 | F1 | 0.8186 |
-| Ingest latency per observation (mean / p95) | 0.247 / 0.648 ms |
-| Correlation over whole graph | 32.3 ms |
-| Investigator query latency (mean / p95) | 0.289 / 0.79 ms |
+| Ingest latency per observation (mean / p95) | 0.449 / 1.104 ms |
+| Correlation over whole graph | 51.2 ms |
+| Investigator query latency (mean / p95) | 0.437 / 1.036 ms |
 
 ## Threshold sweep
 | threshold | accuracy % | cross-vector % | FPR % | precision % | F1 |
@@ -41,3 +41,5 @@ Observations: 521, assets scored: 521, threshold: 0.6
 | asn | 69.3 | 69.46 | 0 | 100 | 0.8186 |
 | domain | 69.3 | 69.46 | 0 | 100 | 0.8186 |
 | blocklist | 69.3 | 69.46 | 0 | 100 | 0.8186 |
+| email | 69.3 | 69.46 | 0 | 100 | 0.8186 |
+| phone | 69.3 | 69.46 | 0 | 100 | 0.8186 |

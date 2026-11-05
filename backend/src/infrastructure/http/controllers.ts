@@ -24,9 +24,25 @@ export class AuthController {
   private readonly auth: AuthService;
   constructor(auth: AuthService) { this.auth = auth; }
   register(router: Router): void {
-    router.add('POST', '/api/auth/register', async (c): Promise<HttpResult> => ({ status: 201, body: await this.auth.register(asObject(c.body)) }));
-    router.add('POST', '/api/auth/login', async (c): Promise<HttpResult> => ({ status: 200, body: await this.auth.login(asObject(c.body), c.ip) }));
-    router.add('POST', '/api/auth/logout', async (c): Promise<HttpResult> => { await this.auth.logout(user(c).claims); return { status: 204 }; }, requireAuth(this.auth));
+    const clientCtx = (c: Ctx) => ({ ip: c.ip, userAgent: typeof c.headers['user-agent'] === 'string' ? c.headers['user-agent'] : '' });
+    router.add('GET', '/api/auth/captcha', async (): Promise<HttpResult> => ({ status: 200, body: this.auth.generateCaptcha() }));
+    router.add('POST', '/api/auth/register', async (c): Promise<HttpResult> => ({ status: 201, body: await this.auth.register(asObject(c.body), clientCtx(c)) }));
+    router.add('POST', '/api/auth/login', async (c): Promise<HttpResult> => ({ status: 200, body: await this.auth.login(asObject(c.body), c.ip, clientCtx(c)) }));
+    router.add('POST', '/api/auth/refresh', async (c): Promise<HttpResult> => {
+      const b = asObject(c.body);
+      const token = typeof b.refreshToken === 'string' ? b.refreshToken : '';
+      return { status: 200, body: await this.auth.refresh(token, clientCtx(c)) };
+    });
+    router.add('POST', '/api/auth/revoke-all', async (c): Promise<HttpResult> => {
+      await this.auth.revokeAll(user(c).user.id);
+      return { status: 200, body: { success: true, message: 'All active sessions have been terminated worldwide.' } };
+    }, requireAuth(this.auth));
+    router.add('POST', '/api/auth/logout', async (c): Promise<HttpResult> => {
+      const b = asObject(c.body);
+      const rf = typeof b.refreshToken === 'string' ? (b.refreshToken as string) : undefined;
+      await this.auth.logout(user(c).claims, rf);
+      return { status: 204 };
+    }, requireAuth(this.auth));
     router.add('GET', '/api/auth/me', async (c): Promise<HttpResult> => ({ status: 200, body: { user: user(c).user } }), requireAuth(this.auth));
     router.add('POST', '/api/auth/forgot-password', async (c): Promise<HttpResult> => ({ status: 200, body: await this.auth.requestPasswordReset(asObject(c.body)) }));
     router.add('POST', '/api/auth/reset-password', async (c): Promise<HttpResult> => ({ status: 200, body: await this.auth.resetPassword(asObject(c.body)) }));
@@ -50,8 +66,13 @@ export class SearchController {
       const b = asObject(c.body);
       const text = typeof b.text === 'string' ? b.text : '';
       const sender = typeof b.sender === 'string' ? b.sender : undefined;
-      if (!text.trim()) throw new AppError(400, 'bad_message', 'Provide message text to analyze.');
-      return { status: 200, body: analyzeMessage(text, sender) };
+      if (!text.trim() && !sender?.trim()) {
+        throw new AppError(400, 'bad_message', 'Provide message text or a phone number to analyze.');
+      }
+      const smishing = analyzeMessage(text, sender);
+      const target = sender?.trim() || smishing.extracted.phones[0] || smishing.extracted.domains[0] || '';
+      const relatedScan = target ? await this.search.checkRelatedScan(target, user(c).user.id) : null;
+      return { status: 200, body: { ...smishing, relatedScan } };
     }, guard);
   }
 }

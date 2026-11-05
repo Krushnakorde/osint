@@ -15,7 +15,10 @@ export const normPhone = (s: string): string => {
   if (/^[a-zA-Z]{2}-[a-zA-Z0-9]{5,8}$/.test(trimmed)) {
     return trimmed.toUpperCase();
   }
-  const digits = trimmed.replace(/\D/g, '');
+  let digits = trimmed.replace(/\D/g, '');
+  if (digits.startsWith('0') && digits.length === 11) {
+    digits = digits.slice(1);
+  }
   if (trimmed.startsWith('+')) return `+${digits}`;
   return digits.length === 10 ? `+91${digits}` : `+${digits}`;
 };

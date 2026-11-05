@@ -246,7 +246,7 @@ When running `npm start` in `backend/`, [`backend/src/server.ts`](file:///d:/Per
 During your practical viva examination or live project evaluation, use these sample scenarios to demonstrate the full power of the system:
 
 ### Demo Scenario 1: Investigating a Phishing Domain
-1. Log in to the dashboard (use `admin@osint.local` / password `adminpassword123` or register a new user).
+1. Log in to the dashboard using your registered credentials, or click the **⚡ Quick Admin Access** button.
 2. Enter this domain in the search box:
    ```
    sbi-pan-kyc.xyz

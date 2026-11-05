@@ -6,7 +6,8 @@ import type { Middleware } from './Router.ts';
 export const requireAuth = (auth: AuthService): Middleware => (next) => async (ctx) => {
   const header = ctx.headers.authorization ?? '';
   const token = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
-  const a = token ? await auth.authenticate(token) : null;
+  const userAgent = typeof ctx.headers['user-agent'] === 'string' ? ctx.headers['user-agent'] : '';
+  const a = token ? await auth.authenticate(token, { ip: ctx.ip, userAgent }) : null;
   if (!a) throw new AppError(401, 'unauthenticated', 'Please log in.');
   return next({ ...ctx, auth: a });
 };

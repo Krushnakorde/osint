@@ -41,35 +41,87 @@ export interface User {
   email: string;
   name: string;
   role: 'user' | 'admin';
+  dob?: string;
+  residentialAddress?: string;
+  phone?: string;
+  businessNature?: string;
 }
 
-/** Authentication response containing the signed JWT and the user profile */
+/** Authentication response containing the signed JWT, rotated refresh token, and the user profile */
 export interface AuthResponse {
   token: string;
+  refreshToken?: string;
+  expiresAt?: string;
   user: User;
 }
 
-/** Local storage key used to persist the stateless JWT across browser reloads */
+/** Local storage keys used to persist credentials across browser reloads */
 const TOKEN_KEY = 'osint_jwt_token';
+const REFRESH_TOKEN_KEY = 'osint_refresh_token';
 
-/** In-memory cache of the active JWT token */
+/** In-memory cache of the active JWT access token and rotated refresh token */
 let authToken: string | null =
   typeof localStorage !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;
+let refreshToken: string | null =
+  typeof localStorage !== 'undefined' ? localStorage.getItem(REFRESH_TOKEN_KEY) : null;
 
 /** Retrieves the current active JWT token */
 export const getAuthToken = (): string | null => authToken;
+/** Retrieves the current active refresh token */
+export const getRefreshToken = (): string | null => refreshToken;
 
 /**
- * Sets or clears the active JWT in memory and persists it to browser LocalStorage.
- * Passing `null` removes the token (used during logout).
+ * Sets or clears the active JWT & refresh token in memory and persists them to browser LocalStorage.
+ * Passing `null` removes the tokens (used during logout).
  */
-export const setAuthToken = (token: string | null): void => {
+export const setAuthToken = (token: string | null, newRefreshToken?: string | null): void => {
   authToken = token;
   if (typeof localStorage !== 'undefined') {
-    if (token) localStorage.setItem(TOKEN_KEY, token);
-    else localStorage.removeItem(TOKEN_KEY);
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+      if (!localStorage.getItem('osint_login_time')) {
+        localStorage.setItem('osint_login_time', String(Date.now()));
+      }
+    } else {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem('osint_login_time');
+      localStorage.removeItem('osint_remember_me');
+    }
+  }
+  if (newRefreshToken !== undefined) {
+    refreshToken = newRefreshToken;
+    if (typeof localStorage !== 'undefined') {
+      if (newRefreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
+      else localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
   }
 };
+
+/** Refresh synchronization mutex and wait queue */
+let isRefreshing = false;
+let refreshQueue: Array<(token: string | null) => void> = [];
+
+async function performRefresh(): Promise<string | null> {
+  if (!refreshToken) return null;
+  try {
+    const res = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken }),
+    });
+    if (res.status === 200) {
+      const data = (await res.json()) as AuthResponse;
+      if (data?.token) {
+        setAuthToken(data.token, data.refreshToken ?? null);
+        return data.token;
+      }
+    }
+  } catch {
+    // refresh failed
+  }
+  setAuthToken(null, null);
+  return null;
+}
 
 /** Possible body responses returned by the investigation search endpoint */
 export type SearchBody = Investigation | NotFound | { error: string };
@@ -77,7 +129,7 @@ export type SearchBody = Investigation | NotFound | { error: string };
 /**
  * Core HTTP fetch wrapper.
  * Automatically injects the JWT Bearer authorization header if a session exists.
- * Gracefully parses JSON responses without throwing unhandled syntax errors.
+ * Transparently refreshes short-lived tokens and replays requests on 401s.
  */
 async function requestJson<T>(
   path: string,
@@ -88,6 +140,37 @@ async function requestJson<T>(
     headers.set('Authorization', `Bearer ${authToken}`);
   }
   const res = await fetch(path, { ...options, headers });
+
+  // If 401 unauthenticated and we have a refreshToken, perform silent token rotation & retry
+  if (
+    res.status === 401 &&
+    refreshToken &&
+    !path.startsWith('/api/auth/refresh') &&
+    !path.startsWith('/api/auth/login')
+  ) {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      const newToken = await performRefresh();
+      isRefreshing = false;
+      refreshQueue.forEach((cb) => cb(newToken));
+      refreshQueue = [];
+      if (newToken) {
+        headers.set('Authorization', `Bearer ${newToken}`);
+        const retryRes = await fetch(path, { ...options, headers });
+        const retryBody = (await retryRes.json().catch(() => ({}))) as T;
+        return { status: retryRes.status, body: retryBody };
+      }
+    } else {
+      const newToken = await new Promise<string | null>((resolve) => refreshQueue.push(resolve));
+      if (newToken) {
+        headers.set('Authorization', `Bearer ${newToken}`);
+        const retryRes = await fetch(path, { ...options, headers });
+        const retryBody = (await retryRes.json().catch(() => ({}))) as T;
+        return { status: retryRes.status, body: retryBody };
+      }
+    }
+  }
+
   const body = (await res.json().catch(() => ({}))) as T;
   return { status: res.status, body };
 }
@@ -121,21 +204,56 @@ export const getStats = async (): Promise<Stats> =>
 // AUTHENTICATION APIS
 // ----------------------------------------------------------------------------
 
-/** Authenticates user with email and password, obtaining a signed JWT */
-export const login = (email: string, password: string) =>
+export interface CaptchaData {
+  id: string;
+  svg: string;
+  captchaToken: string;
+}
+
+/** Fetches a fresh cryptographic SVG CAPTCHA puzzle from the server */
+export const getCaptcha = () => requestJson<CaptchaData>('/api/auth/captcha');
+
+/** Authenticates user with email, password, and optional CAPTCHA, obtaining a signed JWT and refresh token */
+export const login = (
+  email: string,
+  password: string,
+  captchaToken?: string,
+  captchaAnswer?: string
+) =>
   requestJson<AuthResponse>('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, captchaToken, captchaAnswer }),
   });
 
-/** Registers a new account and immediately receives a signed JWT */
-export const register = (email: string, password: string, name: string) =>
-  requestJson<AuthResponse>('/api/auth/register', {
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  name: string;
+  dob?: string;
+  residentialAddress?: string;
+  phone?: string;
+  businessNature?: string;
+  captchaToken?: string;
+  captchaAnswer?: string;
+}
+
+/** Registers a new account with profile validation and immediately receives tokens */
+export const register = (
+  input: RegisterPayload | string,
+  legacyPassword?: string,
+  legacyName?: string
+) => {
+  const payload =
+    typeof input === 'string'
+      ? { email: input, password: legacyPassword || '', name: legacyName || '' }
+      : input;
+  return requestJson<AuthResponse>('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, name }),
+    body: JSON.stringify(payload),
   });
+};
 
 /** Retrieves the current authenticated user's profile using the stored Bearer token */
 export const getMe = () => requestJson<{ user: User }>('/api/auth/me');
@@ -157,23 +275,51 @@ export const resetPassword = (email: string, code: string, newPassword: string) 
   });
 
 /**
- * Terminates user session: notifies backend to add token JTI to revocation list,
- * and clears the token from browser LocalStorage.
+ * Terminates user session: notifies backend to revoke tokens,
+ * and clears tokens from browser LocalStorage.
  */
 export const logout = async () => {
   try {
-    await requestJson('/api/auth/logout', { method: 'POST' });
+    const rf = getRefreshToken();
+    await requestJson('/api/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: rf }),
+    });
   } finally {
-    setAuthToken(null);
+    setAuthToken(null, null);
   }
 };
 
 /**
+ * Emergency Security Killswitch: Invalides all active sessions across all devices worldwide.
+ */
+export const revokeAllSessions = async () =>
+  requestJson<{ success: boolean; message: string }>('/api/auth/revoke-all', {
+    method: 'POST',
+  });
+
+/**
  * Verifies active session on initial page load.
+ * Supports seamless daily (24-hour) auto-login and automatic refresh token rotation.
  * Returns the User object if token is valid, or null if expired/invalid.
  */
 export const ensureSession = async (): Promise<User | null> => {
-  if (authToken) {
+  if (authToken || refreshToken) {
+    const loginTimeStr =
+      typeof localStorage !== 'undefined' ? localStorage.getItem('osint_login_time') : null;
+    const isRemembered =
+      typeof localStorage !== 'undefined' ? localStorage.getItem('osint_remember_me') !== 'false' : true;
+
+    if (loginTimeStr && !isRemembered) {
+      const elapsed = Date.now() - Number(loginTimeStr);
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+      if (elapsed > ONE_DAY_MS && !refreshToken) {
+        setAuthToken(null, null);
+        return null;
+      }
+    }
+
     try {
       const me = await getMe();
       if (me.status === 200 && me.body?.user) return me.body.user;
@@ -181,7 +327,7 @@ export const ensureSession = async (): Promise<User | null> => {
       // Network failure or invalid session
     }
     // Token is expired or revoked: purge it
-    setAuthToken(null);
+    setAuthToken(null, null);
   }
   return null;
 };
@@ -272,13 +418,13 @@ export const triggerCorrelate = async (): Promise<unknown> => {
  * @param sender Optional sender header (e.g. "VM-HDFCBK" or "+919876543210").
  */
 export const analyzeMessageApi = async (
-  text: string,
+  text?: string,
   sender?: string
 ): Promise<SmishingAnalysis> => {
   const { body } = await requestJson<SmishingAnalysis>('/api/message/analyze', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, sender }),
+    body: JSON.stringify({ text: text || '', sender: sender || '' }),
   });
   return body;
 };

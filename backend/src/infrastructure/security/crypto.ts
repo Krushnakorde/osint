@@ -29,6 +29,17 @@ const b64u = (b: Buffer | string): string => Buffer.from(b).toString('base64url'
 const HEADER = b64u(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
 
 /**
+ * Computes a cryptographic client fingerprint hash binding the token to the user's browser/subnet.
+ * Protects against token theft: if a stolen token is replayed from another machine, the fingerprint mismatches.
+ */
+export function computeFingerprint(ip?: string, userAgent?: string): string {
+  // Normalize subnet (e.g. 192.168.1.xxx) to accommodate dynamic client DHCP hops while blocking remote replay
+  const normIp = (ip || '').replace(/:\d+$/, '').split('.').slice(0, 3).join('.');
+  const normUa = (userAgent || '').trim().toLowerCase();
+  return crypto.createHash('sha256').update(`${normIp}|${normUa}`).digest('hex').slice(0, 16);
+}
+
+/**
  * Minimal HS256 JSON Web Token. Strict on purpose: only HS256 is accepted (no "alg: none" trick),
  * the signature is compared in constant time, and exp/sub/jti are required.
  * To use the `jsonwebtoken` package instead, implement the same `TokenService` interface: nothing else changes.
@@ -42,9 +53,17 @@ export class Hs256TokenService implements TokenService {
   }
   private mac(data: string): string { return crypto.createHmac('sha256', this.secret).update(data).digest('base64url'); }
 
-  sign(claims: { sub: string; role: Role }, nowMs = Date.now()): { token: string; claims: TokenClaims } {
+  sign(claims: { sub: string; role: Role; v?: number; fgp?: string }, nowMs = Date.now()): { token: string; claims: TokenClaims } {
     const iat = Math.floor(nowMs / 1000);
-    const full: TokenClaims = { sub: claims.sub, role: claims.role, jti: crypto.randomUUID(), iat, exp: iat + Math.round(this.ttlHours * 3600) };
+    const full: TokenClaims = {
+      sub: claims.sub,
+      role: claims.role,
+      jti: crypto.randomUUID(),
+      v: claims.v ?? 1,
+      ...(claims.fgp ? { fgp: claims.fgp } : {}),
+      iat,
+      exp: iat + Math.round(this.ttlHours * 3600),
+    };
     const body = `${HEADER}.${b64u(JSON.stringify(full))}`;
     return { token: `${body}.${this.mac(body)}`, claims: full };
   }

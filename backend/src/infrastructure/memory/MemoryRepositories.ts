@@ -1,7 +1,8 @@
 import crypto from 'node:crypto';
 import * as A from '../../domain/analytics.ts';
 import type {
-  AnalyticsRepository, DayCount, ModelDoc, ModelRepository, NewSearchEvent, NewUser, RevokedTokenRepository, Scope, SearchEvent,
+  AnalyticsRepository, DayCount, ModelDoc, ModelRepository, NewSearchEvent, NewUser, RefreshTokenRecord,
+  RefreshTokenRepository, RevokedTokenRepository, Scope, SearchEvent,
   SearchEventRepository, Slice, TopQuery, TopUser, Totals, UserRecord, UserRepository,
 } from '../../application/ports.ts';
 
@@ -9,7 +10,7 @@ export class MemoryUserRepository implements UserRepository {
   private users = new Map<string, UserRecord>();
   async create(u: NewUser): Promise<UserRecord> {
     if ([...this.users.values()].some((x) => x.email === u.email)) throw new Error('duplicate email');
-    const rec: UserRecord = { ...u, id: crypto.randomUUID(), createdAt: new Date().toISOString() };
+    const rec: UserRecord = { ...u, id: crypto.randomUUID(), tokenVersion: 1, createdAt: new Date().toISOString() };
     this.users.set(rec.id, rec); return { ...rec };
   }
   async findByEmail(email: string): Promise<UserRecord | null> { const u = [...this.users.values()].find((x) => x.email === email); return u ? { ...u } : null; }
@@ -21,6 +22,12 @@ export class MemoryUserRepository implements UserRepository {
     const u = this.users.get(id);
     if (u) u.passwordHash = newPasswordHash;
   }
+  async incrementTokenVersion(id: string): Promise<number> {
+    const u = this.users.get(id);
+    if (!u) return 1;
+    u.tokenVersion = (u.tokenVersion ?? 1) + 1;
+    return u.tokenVersion;
+  }
 }
 
 export class MemoryRevokedTokenRepository implements RevokedTokenRepository {
@@ -31,6 +38,45 @@ export class MemoryRevokedTokenRepository implements RevokedTokenRepository {
     if (exp === undefined) return false;
     if (exp < Date.now()) { this.revoked.delete(jti); return false; } // an expired token is rejected anyway
     return true;
+  }
+}
+
+export class MemoryRefreshTokenRepository implements RefreshTokenRepository {
+  private tokens = new Map<string, RefreshTokenRecord>();
+
+  async create(token: { id: string; userId: string; familyId: string; fingerprint: string; expiresAt: Date }): Promise<void> {
+    this.tokens.set(token.id, {
+      ...token,
+      isUsed: false,
+      isRevoked: false,
+      createdAt: new Date().toISOString(),
+    });
+  }
+
+  async findById(id: string): Promise<RefreshTokenRecord | null> {
+    const t = this.tokens.get(id);
+    return t ? { ...t } : null;
+  }
+
+  async markUsed(id: string): Promise<void> {
+    const t = this.tokens.get(id);
+    if (t) t.isUsed = true;
+  }
+
+  async revokeFamily(familyId: string): Promise<void> {
+    for (const t of this.tokens.values()) {
+      if (t.familyId === familyId) {
+        t.isRevoked = true;
+      }
+    }
+  }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    for (const t of this.tokens.values()) {
+      if (t.userId === userId) {
+        t.isRevoked = true;
+      }
+    }
   }
 }
 

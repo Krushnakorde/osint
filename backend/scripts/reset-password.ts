@@ -1,8 +1,13 @@
 import { boot } from './_context.ts';
 import { ScryptPasswordHasher } from '../src/infrastructure/security/crypto.ts';
 
-const email = process.argv[2] || 'admin@example.com';
-const newPassword = process.argv[3] || 'Pass@123';
+const email = process.argv[2];
+const newPassword = process.argv[3];
+
+if (!email || !newPassword) {
+  console.error('Usage: npm run reset-password -- <email> <newPassword>');
+  process.exit(1);
+}
 
 const { services, close } = await boot();
 const hasher = new ScryptPasswordHasher();

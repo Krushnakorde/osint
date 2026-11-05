@@ -92,6 +92,13 @@ function Dashboard() {
 
   /** On mount: verify if an existing JWT token in LocalStorage is still valid */
   useEffect(() => {
+    const savedTheme = localStorage.getItem('osint_theme') || 'light';
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
     ensureSession()
       .then((u) => {
         if (u) {

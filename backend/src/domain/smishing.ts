@@ -113,7 +113,15 @@ export function analyzeMessage(text: string, senderHeader?: string): SmishingAna
   // Extract phone numbers, stripping formatting hyphens, spaces, and parentheses
   const phones = [
     ...new Set((content.match(PHONE_REGEX) ?? []).map((p) => p.replace(/[\s\-().]/g, ''))),
-  ].filter((p) => p.length >= 10 && !domains.some((d) => d.includes(p)));
+  ].filter((p) => p.length >= 8 && !domains.some((d) => d.includes(p)));
+
+  // If a sender phone number is provided, ensure it is included in extracted phones
+  if (rawSender && /^\+?[0-9]{8,15}$/.test(rawSender.replace(/[\s\-().]/g, ''))) {
+    const cleanSender = rawSender.replace(/[\s\-().]/g, '');
+    if (!phones.includes(cleanSender)) {
+      phones.unshift(cleanSender);
+    }
+  }
 
   // Extract email addresses
   const emails = [...new Set((content.match(EMAIL_REGEX) ?? []).map((e) => e.toLowerCase()))];
@@ -197,6 +205,18 @@ export function analyzeMessage(text: string, senderHeader?: string): SmishingAna
     score += 30;
     threatIndicators.push('URL Shortener detected (conceals true destination)');
     reasons.push('Uses URL shorteners commonly used to evade automated link filters.');
+  }
+
+  // 6. Direct phone inspection when message text is empty
+  if (!content && rawSender) {
+    if (isOfficialHeader) {
+      score = 0;
+      reasons.push(`Verified official telecom enterprise header: ${rawSender}.`);
+    } else {
+      score = 30;
+      threatIndicators.push('Personal mobile phone sender');
+      reasons.push('Sender is a personal mobile phone number rather than an official registered enterprise header.');
+    }
   }
 
   // Clamp risk score to [0, 100]

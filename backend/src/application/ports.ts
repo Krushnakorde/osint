@@ -43,7 +43,20 @@ export interface GraphStatsReader {
 export type GraphStore = GraphWriter & GraphReader & SnapshotSource & ClusterStore & GraphStatsReader;
 
 /* ---------------------------------------------------------------- users & security */
-export interface UserRecord { id: string; email: string; name: string; passwordHash: string; role: Role; createdAt: string; lastLoginAt?: string }
+export interface UserRecord {
+  id: string;
+  email: string;
+  name: string;
+  passwordHash: string;
+  role: Role;
+  createdAt: string;
+  lastLoginAt?: string;
+  tokenVersion?: number;
+  dob?: string;
+  residentialAddress?: string;
+  phone?: string;
+  businessNature?: string;
+}
 export type NewUser = Omit<UserRecord, 'id' | 'createdAt' | 'lastLoginAt'>;
 export interface UserRepository {
   create(u: NewUser): Promise<UserRecord>;
@@ -53,15 +66,33 @@ export interface UserRepository {
   count(): Promise<number>;
   touchLogin(id: string): Promise<void>;
   updatePassword(id: string, newPasswordHash: string): Promise<void>;
+  incrementTokenVersion(id: string): Promise<number>;
 }
 export interface RevokedTokenRepository {
   revoke(jti: string, expiresAt: Date): Promise<void>;
   isRevoked(jti: string): Promise<boolean>;
 }
+export interface RefreshTokenRecord {
+  id: string;
+  userId: string;
+  familyId: string;
+  fingerprint: string;
+  isUsed: boolean;
+  isRevoked: boolean;
+  expiresAt: Date;
+  createdAt: string;
+}
+export interface RefreshTokenRepository {
+  create(token: { id: string; userId: string; familyId: string; fingerprint: string; expiresAt: Date }): Promise<void>;
+  findById(id: string): Promise<RefreshTokenRecord | null>;
+  markUsed(id: string): Promise<void>;
+  revokeFamily(familyId: string): Promise<void>;
+  revokeAllForUser(userId: string): Promise<void>;
+}
 export interface PasswordHasher { hash(password: string): Promise<string>; verify(password: string, hash: string): Promise<boolean> }
-export interface TokenClaims { sub: string; role: Role; jti: string; iat: number; exp: number }
+export interface TokenClaims { sub: string; role: Role; jti: string; v?: number; fgp?: string; iat: number; exp: number }
 export interface TokenService {
-  sign(claims: { sub: string; role: Role }, nowMs?: number): { token: string; claims: TokenClaims };
+  sign(claims: { sub: string; role: Role; v?: number; fgp?: string }, nowMs?: number): { token: string; claims: TokenClaims };
   verify(token: string, nowMs?: number): TokenClaims | null;
 }
 export interface AttemptLimiter {

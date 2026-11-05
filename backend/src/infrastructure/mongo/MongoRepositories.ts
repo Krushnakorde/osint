@@ -1,13 +1,40 @@
 import mongoose from 'mongoose';
 import type {
-  AnalyticsRepository, DayCount, ModelDoc, ModelRepository, NewSearchEvent, NewUser, RevokedTokenRepository, Scope, SearchEvent,
+  AnalyticsRepository, DayCount, ModelDoc, ModelRepository, NewSearchEvent, NewUser, RefreshTokenRecord,
+  RefreshTokenRepository, RevokedTokenRepository, Scope, SearchEvent,
   SearchEventRepository, Slice, TopQuery, TopUser, Totals, UserRecord, UserRepository,
 } from '../../application/ports.ts';
 import type { Level, Role } from '../../domain/types.ts';
-import { ModelDocModel, RevokedTokenModel, SearchEventModel, UserModel } from './models.ts';
+import { ModelDocModel, RefreshTokenModel, RevokedTokenModel, SearchEventModel, UserModel } from './models.ts';
 
-interface UserLean { _id: mongoose.Types.ObjectId; email: string; name: string; passwordHash: string; role: Role; createdAt: Date; lastLoginAt?: Date }
-const toUser = (u: UserLean): UserRecord => ({ id: String(u._id), email: u.email, name: u.name, passwordHash: u.passwordHash, role: u.role, createdAt: u.createdAt.toISOString(), lastLoginAt: u.lastLoginAt?.toISOString() });
+interface UserLean {
+  _id: mongoose.Types.ObjectId;
+  email: string;
+  name: string;
+  passwordHash: string;
+  role: Role;
+  createdAt: Date;
+  lastLoginAt?: Date;
+  tokenVersion?: number;
+  dob?: string;
+  residentialAddress?: string;
+  phone?: string;
+  businessNature?: string;
+}
+const toUser = (u: UserLean): UserRecord => ({
+  id: String(u._id),
+  email: u.email,
+  name: u.name,
+  passwordHash: u.passwordHash,
+  role: u.role,
+  createdAt: u.createdAt.toISOString(),
+  lastLoginAt: u.lastLoginAt?.toISOString(),
+  tokenVersion: u.tokenVersion ?? 1,
+  dob: u.dob,
+  residentialAddress: u.residentialAddress,
+  phone: u.phone,
+  businessNature: u.businessNature,
+});
 
 export class MongoUserRepository implements UserRepository {
   async create(u: NewUser): Promise<UserRecord> { return toUser((await UserModel.create(u)).toObject() as unknown as UserLean); }
@@ -25,11 +52,68 @@ export class MongoUserRepository implements UserRepository {
   async updatePassword(id: string, newPasswordHash: string): Promise<void> {
     await UserModel.updateOne({ _id: id }, { $set: { passwordHash: newPasswordHash } });
   }
+  async incrementTokenVersion(id: string): Promise<number> {
+    if (!mongoose.isValidObjectId(id)) return 1;
+    const updated = (await UserModel.findByIdAndUpdate(
+      id,
+      { $inc: { tokenVersion: 1 } },
+      { new: true }
+    ).lean()) as unknown as UserLean | null;
+    return updated?.tokenVersion ?? 1;
+  }
 }
 
 export class MongoRevokedTokenRepository implements RevokedTokenRepository {
   async revoke(jti: string, expiresAt: Date): Promise<void> { await RevokedTokenModel.updateOne({ _id: jti }, { $set: { expiresAt } }, { upsert: true }); }
   async isRevoked(jti: string): Promise<boolean> { return (await RevokedTokenModel.exists({ _id: jti })) !== null; }
+}
+
+export class MongoRefreshTokenRepository implements RefreshTokenRepository {
+  async create(token: { id: string; userId: string; familyId: string; fingerprint: string; expiresAt: Date }): Promise<void> {
+    await RefreshTokenModel.create({
+      _id: token.id,
+      userId: token.userId,
+      familyId: token.familyId,
+      fingerprint: token.fingerprint,
+      expiresAt: token.expiresAt,
+    });
+  }
+
+  async findById(id: string): Promise<RefreshTokenRecord | null> {
+    const doc = (await RefreshTokenModel.findById(id).lean()) as {
+      _id: string;
+      userId: string;
+      familyId: string;
+      fingerprint: string;
+      isUsed: boolean;
+      isRevoked: boolean;
+      expiresAt: Date;
+      createdAt: Date;
+    } | null;
+    if (!doc) return null;
+    return {
+      id: doc._id,
+      userId: doc.userId,
+      familyId: doc.familyId,
+      fingerprint: doc.fingerprint,
+      isUsed: doc.isUsed,
+      isRevoked: doc.isRevoked,
+      expiresAt: doc.expiresAt,
+      createdAt: doc.createdAt.toISOString(),
+    };
+  }
+
+  async markUsed(id: string): Promise<void> {
+    await RefreshTokenModel.updateOne({ _id: id }, { $set: { isUsed: true } });
+  }
+
+  async revokeFamily(familyId: string): Promise<void> {
+    await RefreshTokenModel.updateMany({ familyId }, { $set: { isRevoked: true } });
+  }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    await RefreshTokenModel.updateMany({ userId }, { $set: { isRevoked: true } });
+  }
 }
 
 interface EventLean { _id: mongoose.Types.ObjectId; userId: string; query: string; value: string; kind: string; found: boolean; level: Level | null; live: boolean; stored: boolean; latencyMs: number; createdAt: Date }

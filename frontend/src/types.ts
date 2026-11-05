@@ -2,7 +2,7 @@
 export type {
   NodeType, Vector, NodeRow, ClusterInfo, LinkEvidence, GraphNode, GraphLink, Investigation, NotFound,
   SourceReport, LiveSummary, Flag, Level, Reason, Assessment, AssetView, RecentItem, Facts, MessageCode,
-  Role, PublicUser, ChangeVector, SmishingAnalysis, EmailFacts, PhoneFacts,
+  Role, PublicUser, ChangeVector, SmishingAnalysis, EmailFacts, PhoneFacts, RelatedScanInfo,
 } from '../../backend/src/domain/types.ts';
 
 export type {

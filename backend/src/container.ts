@@ -12,7 +12,7 @@ import { InvestigationService } from './application/InvestigationService.ts';
 import { LiveLookupService } from './application/LiveLookupService.ts';
 import { GraphLabelProvider, ModelService, SyntheticProvider } from './application/ModelService.ts';
 import type {
-  AnalyticsRepository, AttemptLimiter, Clock, GraphStore, ModelRepository, PasswordHasher, RevokedTokenRepository,
+  AnalyticsRepository, AttemptLimiter, Clock, GraphStore, ModelRepository, PasswordHasher, RefreshTokenRepository, RevokedTokenRepository,
   SearchEventRepository, TokenService, UserRepository,
 } from './application/ports.ts';
 import { SearchHistoryService } from './application/SearchHistoryService.ts';
@@ -23,11 +23,11 @@ import { openPhishSource } from './infrastructure/collectors/feedSources.ts';
 import { DEFAULT_COLLECTORS } from './infrastructure/collectors/index.ts';
 import { loadBenignDomains, loadBrands } from './infrastructure/files.ts';
 import { MemoryGraphStore } from './infrastructure/memory/MemoryGraphStore.ts';
-import { MemoryModelRepository, MemoryRevokedTokenRepository, MemorySearchStore, MemoryUserRepository } from './infrastructure/memory/MemoryRepositories.ts';
+import { MemoryModelRepository, MemoryRefreshTokenRepository, MemoryRevokedTokenRepository, MemorySearchStore, MemoryUserRepository } from './infrastructure/memory/MemoryRepositories.ts';
 import { Hs256TokenService, ScryptPasswordHasher, WindowAttemptLimiter } from './infrastructure/security/crypto.ts';
 
 export interface Adapters {
-  graph: GraphStore; users: UserRepository; revoked: RevokedTokenRepository;
+  graph: GraphStore; users: UserRepository; revoked: RevokedTokenRepository; refreshTokens: RefreshTokenRepository;
   searches: SearchEventRepository & AnalyticsRepository; models: ModelRepository;
 }
 export interface WireOptions {
@@ -50,14 +50,21 @@ export function wire(a: Adapters, cfg: Config, o: WireOptions = {}) {
   const secret = cfg.jwtSecret || crypto.randomBytes(32).toString('hex'); // memory/demo mode only (see createAdapters)
   const tokens = o.tokens ?? new Hs256TokenService(secret, cfg.jwtTtlHours);
   const limiter = o.limiter ?? new WindowAttemptLimiter(cfg.loginMaxAttempts, cfg.loginWindowMinutes * 60_000);
-  const auth = new AuthService(a.users, o.hasher ?? new ScryptPasswordHasher(), tokens, a.revoked, limiter, cfg, o.clock);
+  const auth = new AuthService(a.users, o.hasher ?? new ScryptPasswordHasher(), tokens, a.revoked, a.refreshTokens, limiter, cfg, o.clock);
   const analytics = new AnalyticsService(a.searches, a.graph, a.users, o.clock);
   return { brands, models, ingest, correlation, assessment, investigation, live, history, search, feeds, auth, analytics, graph: a.graph };
 }
 export type Services = ReturnType<typeof wire>;
 
 export function memoryAdapters(): Adapters {
-  return { graph: new MemoryGraphStore(), users: new MemoryUserRepository(), revoked: new MemoryRevokedTokenRepository(), searches: new MemorySearchStore(), models: new MemoryModelRepository() };
+  return {
+    graph: new MemoryGraphStore(),
+    users: new MemoryUserRepository(),
+    revoked: new MemoryRevokedTokenRepository(),
+    refreshTokens: new MemoryRefreshTokenRepository(),
+    searches: new MemorySearchStore(),
+    models: new MemoryModelRepository(),
+  };
 }
 
 /** Pick the storage backend from configuration. MongoDB code is loaded lazily, so memory mode never needs the driver. */

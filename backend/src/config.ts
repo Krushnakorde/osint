@@ -77,7 +77,8 @@ export interface Config {
   storage: 'mongo' | 'memory';       // Data persistence strategy ('mongo' for Atlas cloud, 'memory' for tests)
   mongoUrl: string;                  // MongoDB Atlas connection string URI
   jwtSecret: string;                 // Secret key used to sign and verify JSON Web Tokens (JWT)
-  jwtTtlHours: number;               // Token validity period in hours (default: 8 hours)
+  jwtTtlHours: number;               // Access token validity period in hours (default: 24 = 1 day for daily auto-login)
+  jwtRefreshTtlDays: number;         // Rotatable refresh token validity period in days (default: 7 days)
   adminEmails: string[];             // List of user emails automatically assigned the 'admin' role
   corsOrigin: string;                // Allowed Cross-Origin Resource Sharing origin for web clients
   loginMaxAttempts: number;          // Maximum failed login attempts allowed before brute-force lockout
@@ -118,7 +119,8 @@ export const config: Config = {
   // Authentication & Session Security:
   // Note: A missing secret is only tolerated in demo/memory mode; Mongo mode requires a secure key.
   jwtSecret: process.env.JWT_SECRET || '',
-  jwtTtlHours: num('JWT_TTL_HOURS', 8),
+  jwtTtlHours: num('JWT_TTL_HOURS', 24),
+  jwtRefreshTtlDays: num('JWT_REFRESH_TTL_DAYS', 7),
   adminEmails: (process.env.ADMIN_EMAILS || '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
 

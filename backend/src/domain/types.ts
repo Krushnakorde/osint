@@ -78,6 +78,18 @@ export interface ChangeVector {
   summary: string;
 }
 
+export interface RelatedScanInfo {
+  scannedBefore: boolean;
+  scanCount: number;
+  lastScanned?: string;
+  foundInGraph: boolean;
+  riskLevel?: Level | null;
+  linkedAssetsCount: number;
+  linkedDomains: string[];
+  threatFlags: string[];
+  summaryNote: string;
+}
+
 export interface SmishingAnalysis {
   isSmishing: boolean;
   riskScore: number;
@@ -91,6 +103,7 @@ export interface SmishingAnalysis {
   };
   threatIndicators: string[];
   reasons: string[];
+  relatedScan?: RelatedScanInfo | null;
 }
 
 export interface SourceReport { source: string; ok: boolean; found: boolean; ms: number; note?: string }
@@ -112,7 +125,16 @@ export interface Investigation {
 export type InvestigationResult = Investigation | NotFound;
 
 export type Role = 'user' | 'admin';
-export interface PublicUser { id: string; email: string; name: string; role: Role }
+export interface PublicUser {
+  id: string;
+  email: string;
+  name: string;
+  role: Role;
+  dob?: string;
+  residentialAddress?: string;
+  phone?: string;
+  businessNature?: string;
+}
 export interface Stats {
   nodes: Record<string, number>; edges: number; observations: number; clusters: number; correlatedClusters: number;
 }

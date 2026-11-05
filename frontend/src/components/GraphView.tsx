@@ -100,23 +100,25 @@ export default function GraphView({ graph, assets, truncated, onSelect }: Props)
   const radius = (n: GraphNode): number =>
     (ASSET_TYPES.has(n.type) ? 8 : 4) + (n.isQuery ? 3 : 0);
 
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
   return (
     <div
       ref={box}
-      className="relative h-full min-h-[420px] w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950"
+      className="relative h-full min-h-[420px] w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950"
     >
       <ForceGraph2D
         graphData={data}
         width={size.width}
         height={size.height}
-        backgroundColor="#020617"
+        backgroundColor={isDark ? '#020617' : '#f8fafc'}
         nodeId="id"
         // HTML Tooltip on hover
         nodeLabel={(n) =>
           `<b>${esc(t(`type.${String(n.type)}`))}</b><br/>${esc(String(n.value))}`
         }
         linkLabel={(l) => esc(t(`rel.${String(l.rel)}`))}
-        linkColor={() => 'rgba(148,163,184,0.45)'}
+        linkColor={() => isDark ? 'rgba(148,163,184,0.45)' : 'rgba(100,116,139,0.35)'}
         linkWidth={1.2}
         nodeCanvasObjectMode={() => 'replace'}
         // Custom Canvas Renderer for Nodes, Threat Halos, and Typography
@@ -139,10 +141,10 @@ export default function GraphView({ graph, assets, truncated, onSelect }: Props)
             ctx.stroke();
           }
 
-          // 3. Draw white target concentric ring if this is the actively searched query
+          // 3. Draw target concentric ring if this is the actively searched query
           if (n.isQuery) {
             ctx.lineWidth = 1.5 / scale;
-            ctx.strokeStyle = '#ffffff';
+            ctx.strokeStyle = isDark ? '#ffffff' : '#0284c7';
             ctx.beginPath();
             ctx.arc(n.x, n.y, r + 3 / scale, 0, 2 * Math.PI);
             ctx.stroke();
@@ -153,7 +155,7 @@ export default function GraphView({ graph, assets, truncated, onSelect }: Props)
             ctx.font = `${Math.max(3, 11 / scale)}px sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'top';
-            ctx.fillStyle = '#e2e8f0';
+            ctx.fillStyle = isDark ? '#e2e8f0' : '#0f172a';
             ctx.fillText(shorten(n.value, 24), n.x, n.y + r + 2 / scale);
           }
         }}

@@ -172,12 +172,47 @@ export const UserModel = model(
       name: String,
       passwordHash: String,
       role: { type: String, enum: ['user', 'admin'], default: 'user' },
+      tokenVersion: { type: Number, default: 1 },
       createdAt: { type: Date, default: Date.now },
       lastLoginAt: Date,
+      dob: String,
+      residentialAddress: String,
+      phone: String,
+      businessNature: {
+        type: String,
+        enum: ['student', 'developer', 'general_people', 'security_analyst', 'enterprise'],
+        default: 'general_people',
+      },
     },
     opts
   ),
   'users'
+);
+
+/**
+ * Refresh Token Model:
+ * Manages rotatable refresh tokens with token family lineage for automatic reuse breach detection.
+ * Self-cleans via MongoDB TTL index.
+ */
+export const RefreshTokenModel = model(
+  'RefreshToken',
+  new Schema(
+    {
+      _id: String,
+      userId: { type: String, required: true },
+      familyId: { type: String, required: true },
+      fingerprint: { type: String, default: '' },
+      isUsed: { type: Boolean, default: false },
+      isRevoked: { type: Boolean, default: false },
+      expiresAt: { type: Date, required: true },
+      createdAt: { type: Date, default: Date.now },
+    },
+    opts
+  )
+    .index({ expiresAt: 1 }, { expireAfterSeconds: 0 })
+    .index({ userId: 1 })
+    .index({ familyId: 1 }),
+  'refresh_tokens'
 );
 
 /**

@@ -94,9 +94,9 @@ export const isPhone = (s: string): boolean => {
   // Check for Indian TRAI DLT header syntax (e.g., "VM-HDFCBK", "AD-AIRTEL")
   if (/^[a-zA-Z]{2}-[a-zA-Z0-9]{5,8}$/.test(t)) return true;
 
-  // Otherwise check standard numeric phone format
+  // Otherwise check standard numeric phone format (allows leading 0 and 8 to 15 digits)
   const digits = t.replace(/[\s\-().]/g, '');
-  return /^\+?[1-9]\d{7,14}$/.test(digits);
+  return /^\+?[0-9]{8,15}$/.test(digits);
 };
 
 /**

@@ -1,7 +1,8 @@
 import type { Config } from '../config.ts';
 import { detectIndicator } from '../domain/detect.ts';
 import { analyzeMessage } from '../domain/smishing.ts';
-import type { Investigation, InvestigationResult, LiveSummary, MessageCode, NodeRow, NotFound, PublicUser } from '../domain/types.ts';
+import type { Investigation, InvestigationResult, LiveSummary, MessageCode, NodeRow, NotFound, PublicUser, RelatedScanInfo } from '../domain/types.ts';
+import type { SearchEvent } from './ports.ts';
 import type { CorrelationService } from './CorrelationService.ts';
 import type { InvestigationService } from './InvestigationService.ts';
 import type { LiveLookupService } from './LiveLookupService.ts';
@@ -95,5 +96,70 @@ export class SearchService {
   /** History must never break a search. */
   private async safeRecord(e: Parameters<SearchHistoryService['record']>[0]): Promise<void> {
     try { await this.history.record(e); } catch (err) { console.warn(`[history] could not record: ${(err as Error).message}`); }
+  }
+
+  /**
+   * Checks whether an indicator (phone number, domain, etc.) has been previously scanned or recorded
+   * in the search history or knowledge graph database.
+   */
+  async checkRelatedScan(query: string, userId?: string): Promise<RelatedScanInfo | null> {
+    const raw = String(query || '').trim();
+    if (!raw) return null;
+    const det = detectIndicator(raw);
+    const target = det.kind === 'unknown' ? raw : det.value;
+
+    // 1. Check if node exists in graph or has an investigation record
+    const existing = await this.investigation.findNode(target);
+    let inv: Investigation | null = null;
+    if (existing) {
+      const res = await this.investigation.investigate(target);
+      if (res.found) inv = res;
+    }
+
+    // 2. Check search audit history if userId is available
+    let pastSearches: SearchEvent[] = [];
+    if (userId) {
+      try {
+        const history = await this.history.list(userId, 100);
+        pastSearches = history.filter(
+          (h) => h.value.toLowerCase().includes(target.toLowerCase()) || h.query.toLowerCase().includes(raw.toLowerCase())
+        );
+      } catch {
+        // history check non-blocking
+      }
+    }
+
+    const foundInGraph = !!inv;
+    const scannedBefore = pastSearches.length > 0 || foundInGraph;
+    const scanCount = pastSearches.length > 0 ? pastSearches.length : (foundInGraph ? 1 : 0);
+    const lastScanned = pastSearches.length > 0 ? pastSearches[0].createdAt : undefined;
+
+    const linkedDomains = inv
+      ? inv.graph.nodes.filter((n) => n.type === 'domain').map((n) => n.value)
+      : [];
+    const threatFlags = inv ? inv.flags.map((f) => `${f.type}: ${f.value}`) : [];
+    const linkedAssetsCount = inv ? inv.assets.length : 0;
+    const riskLevel = inv ? inv.assessment.level : null;
+
+    let summaryNote = '';
+    if (foundInGraph) {
+      summaryNote = `Found existing intelligence in knowledge graph! Connected to ${linkedAssetsCount} asset(s) with ${threatFlags.length} threat flag(s).`;
+    } else if (scannedBefore) {
+      summaryNote = `This number was previously queried in search history (${scanCount} time(s)), but no scam infrastructure was linked.`;
+    } else {
+      summaryNote = `No previous scan found for this number in your intelligence database. You can run a fresh full investigation.`;
+    }
+
+    return {
+      scannedBefore,
+      scanCount,
+      lastScanned,
+      foundInGraph,
+      riskLevel,
+      linkedAssetsCount,
+      linkedDomains: linkedDomains.slice(0, 10),
+      threatFlags: threatFlags.slice(0, 10),
+      summaryNote,
+    };
   }
 }
